@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	chirpIDString := r.PathValue("chirpID")
 	chirpID, err := uuid.Parse(chirpIDString)
 	if err != nil {
@@ -14,7 +14,7 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbChirp, err := cfg.db.GetChirp(r.Context(), chirpID)
+	dbChirp, err := cfg.Db.GetChirp(r.Context(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Couldn't get chirp", err)
 		return
@@ -29,8 +29,8 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (cfg *apiConfig) handlerChirpsRetrieve(w http.ResponseWriter, r *http.Request) {
-	dbChirps, err := cfg.db.GetChirps(r.Context())
+func (cfg *ApiConfig) HandlerChirpsRetrieve(w http.ResponseWriter, r *http.Request) {
+	dbChirps, err := cfg.Db.GetChirps(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps", err)
 		return

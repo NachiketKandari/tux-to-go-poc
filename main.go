@@ -7,18 +7,11 @@ import (
 	"os"
 	"sync/atomic"
 
+	"example.com/m/handler"
 	"example.com/m/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
-
-type apiConfig struct {
-	fileserverHits atomic.Int32
-	db             *database.Queries
-	platform       string
-	jwtSecret      string
-	polkaKey       string
-}
 
 func main() {
 	const filepathRoot = "."
@@ -29,16 +22,16 @@ func main() {
 	if dbURL == "" {
 		log.Fatal("DB_URL must be set")
 	}
-	platform := os.Getenv("PLATFORM")
-	if platform == "" {
+	Platform := os.Getenv("PLATFORM")
+	if Platform == "" {
 		log.Fatal("PLATFORM must be set")
 	}
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
+	JwtSecret := os.Getenv("JWT_SECRET")
+	if JwtSecret == "" {
 		log.Fatal("JWT_SECRET environment variable is not set")
 	}
-	polkaKey := os.Getenv("POLKA_KEY")
-	if polkaKey == "" {
+	PolkaKey := os.Getenv("POLKA_KEY")
+	if PolkaKey == "" {
 		log.Fatal("POLKA_KEY environment variable is not set")
 	}
 
@@ -48,36 +41,36 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
-	apiCfg := apiConfig{
-		fileserverHits: atomic.Int32{},
-		db:             dbQueries,
-		platform:       platform,
-		jwtSecret:      jwtSecret,
-		polkaKey:       polkaKey,
+	ApiCfg := &handler.ApiConfig{
+		FileserverHits: atomic.Int32{},
+		Db:             dbQueries,
+		Platform:       Platform,
+		JwtSecret:      JwtSecret,
+		PolkaKey:       PolkaKey,
 	}
 
 	mux := http.NewServeMux()
-	fsHandler := apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
+	fsHandler := ApiCfg.MiddlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
 	mux.Handle("/app/", fsHandler)
 
-	mux.HandleFunc("GET /api/healthz", handlerReadiness)
+	mux.HandleFunc("GET /api/healthz", handler.HandlerReadiness)
 
-	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerWebhook)
+	mux.HandleFunc("POST /api/polka/webhooks", ApiCfg.HandlerWebhook)
 
-	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
-	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
-	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
+	mux.HandleFunc("POST /api/login", ApiCfg.HandlerLogin)
+	mux.HandleFunc("POST /api/refresh", ApiCfg.HandlerRefresh)
+	mux.HandleFunc("POST /api/revoke", ApiCfg.HandlerRevoke)
 
-	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
-	mux.HandleFunc("PUT /api/users", apiCfg.handlerUsersUpdate)
+	mux.HandleFunc("POST /api/users", ApiCfg.HandlerUsersCreate)
+	mux.HandleFunc("PUT /api/users", ApiCfg.HandlerUsersUpdate)
 
-	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
-	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsRetrieve)
-	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpsGet)
-	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.handlerChirpsDelete)
+	mux.HandleFunc("POST /api/chirps", ApiCfg.HandlerChirpsCreate)
+	mux.HandleFunc("GET /api/chirps", ApiCfg.HandlerChirpsRetrieve)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", ApiCfg.HandlerChirpsGet)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", ApiCfg.HandlerChirpsDelete)
 
-	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
+	mux.HandleFunc("POST /admin/reset", ApiCfg.HandlerReset)
+	mux.HandleFunc("GET /admin/metrics", ApiCfg.HandlerMetrics)
 
 	srv := &http.Server{
 		Addr:    ":" + port,

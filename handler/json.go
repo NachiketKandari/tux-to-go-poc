@@ -1,10 +1,21 @@
-package main
+package handler
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync/atomic"
+
+	"example.com/m/internal/database"
 )
+
+type ApiConfig struct {
+	FileserverHits atomic.Int32
+	Db             *database.Queries
+	Platform       string
+	JwtSecret      string
+	PolkaKey       string
+}
 
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	if err != nil {

@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"example.com/m/internal/database"
 )
 
-func (cfg *apiConfig) handlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerUsersUpdate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Password string `json:"password"`
 		Email    string `json:"email"`
@@ -22,7 +22,7 @@ func (cfg *apiConfig) handlerUsersUpdate(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, http.StatusUnauthorized, "Couldn't find JWT", err)
 		return
 	}
-	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	userID, err := auth.ValidateJWT(token, cfg.JwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't validate JWT", err)
 		return
@@ -42,7 +42,7 @@ func (cfg *apiConfig) handlerUsersUpdate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.db.UpdateUser(r.Context(), database.UpdateUserParams{
+	user, err := cfg.Db.UpdateUser(r.Context(), database.UpdateUserParams{
 		ID:             userID,
 		Email:          params.Email,
 		HashedPassword: hashedPassword,

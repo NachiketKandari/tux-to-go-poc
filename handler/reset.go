@@ -1,16 +1,16 @@
-package main
+package handler
 
 import "net/http"
 
-func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
-	if cfg.platform != "dev" {
+func (cfg *ApiConfig) HandlerReset(w http.ResponseWriter, r *http.Request) {
+	if cfg.Platform != "dev" {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Reset is only allowed in dev environment."))
 		return
 	}
 
-	cfg.fileserverHits.Store(0)
-	err := cfg.db.Reset(r.Context())
+	cfg.FileserverHits.Store(0)
+	err := cfg.Db.Reset(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to reset the database: " + err.Error()))

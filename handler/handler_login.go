@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"example.com/m/internal/database"
 )
 
-func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Password string `json:"password"`
 		Email    string `json:"email"`
@@ -28,7 +28,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := cfg.db.GetUserByEmail(r.Context(), params.Email)
+	user, err := cfg.Db.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Incorrect email or password", err)
 		return
@@ -42,7 +42,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, err := auth.MakeJWT(
 		user.ID,
-		cfg.jwtSecret,
+		cfg.JwtSecret,
 		time.Hour,
 	)
 	if err != nil {
@@ -52,7 +52,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	refreshToken := auth.MakeRefreshToken()
 
-	_, err = cfg.db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+	_, err = cfg.Db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
 		UserID:    user.ID,
 		Token:     refreshToken,
 		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),

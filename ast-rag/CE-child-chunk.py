@@ -266,7 +266,7 @@ user_request = """
 I need to add a 'likes' count to the Chirp model.
 It should be an integer and default to 0.
 
-Then, update the 'handlerChirpsCreate' function. After creating a chirp,
+Then, update the 'HandlerChirpsCreate' function. After creating a chirp,
 the response should include this new 'likes' field.
 """
 

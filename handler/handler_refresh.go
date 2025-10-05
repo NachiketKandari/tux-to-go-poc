@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"example.com/m/internal/auth"
 )
 
-func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerRefresh(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		Token string `json:"token"`
 	}
@@ -18,7 +18,7 @@ func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := cfg.db.GetUserFromRefreshToken(r.Context(), refreshToken)
+	user, err := cfg.Db.GetUserFromRefreshToken(r.Context(), refreshToken)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't get user for refresh token", err)
 		return
@@ -26,7 +26,7 @@ func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, err := auth.MakeJWT(
 		user.ID,
-		cfg.jwtSecret,
+		cfg.JwtSecret,
 		time.Hour,
 	)
 	if err != nil {
@@ -39,14 +39,14 @@ func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (cfg *apiConfig) handlerRevoke(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerRevoke(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't find token", err)
 		return
 	}
 
-	_, err = cfg.db.RevokeRefreshToken(r.Context(), refreshToken)
+	_, err = cfg.Db.RevokeRefreshToken(r.Context(), refreshToken)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't revoke session", err)
 		return

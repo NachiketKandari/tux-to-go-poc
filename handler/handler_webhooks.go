@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerWebhook(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Event string `json:"event"`
 		Data  struct {
@@ -23,7 +23,7 @@ func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't find api key", err)
 		return
 	}
-	if apiKey != cfg.polkaKey {
+	if apiKey != cfg.PolkaKey {
 		respondWithError(w, http.StatusUnauthorized, "API key is invalid", err)
 		return
 	}
@@ -41,7 +41,7 @@ func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = cfg.db.UpgradeToChirpyRed(r.Context(), params.Data.UserID)
+	_, err = cfg.Db.UpgradeToChirpyRed(r.Context(), params.Data.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			respondWithError(w, http.StatusNotFound, "Couldn't find user", err)

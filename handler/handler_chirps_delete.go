@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerChirpsDelete(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerChirpsDelete(w http.ResponseWriter, r *http.Request) {
 	chirpIDString := r.PathValue("chirpID")
 	chirpID, err := uuid.Parse(chirpIDString)
 	if err != nil {
@@ -20,13 +20,13 @@ func (cfg *apiConfig) handlerChirpsDelete(w http.ResponseWriter, r *http.Request
 		respondWithError(w, http.StatusUnauthorized, "Couldn't find JWT", err)
 		return
 	}
-	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	userID, err := auth.ValidateJWT(token, cfg.JwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't validate JWT", err)
 		return
 	}
 
-	dbChirp, err := cfg.db.GetChirp(r.Context(), chirpID)
+	dbChirp, err := cfg.Db.GetChirp(r.Context(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Couldn't get chirp", err)
 		return
@@ -36,7 +36,7 @@ func (cfg *apiConfig) handlerChirpsDelete(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = cfg.db.DeleteChirp(r.Context(), chirpID)
+	err = cfg.Db.DeleteChirp(r.Context(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't delete chirp", err)
 		return

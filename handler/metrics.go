@@ -1,11 +1,11 @@
-package main
+package handler
 
 import (
 	"fmt"
 	"net/http"
 )
 
-func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf(`
@@ -17,12 +17,12 @@ func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 </body>
 
 </html>
-	`, cfg.fileserverHits.Load())))
+	`, cfg.FileserverHits.Load())))
 }
 
-func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
+func (cfg *ApiConfig) MiddlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg.fileserverHits.Add(1)
+		cfg.FileserverHits.Add(1)
 		next.ServeHTTP(w, r)
 	})
 }

@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type User struct {
 	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
-func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Password string `json:"password"`
 		Email    string `json:"email"`
@@ -42,7 +42,7 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+	user, err := cfg.Db.CreateUser(r.Context(), database.CreateUserParams{
 		Email:          params.Email,
 		HashedPassword: hashedPassword,
 	})
