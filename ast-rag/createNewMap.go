@@ -75,14 +75,17 @@ type CodeMetadata struct {
 }
 
 func main() {
-	rootDirs := []string{"..", "../internal"} // Adjust as needed
+	rootDirs := []string{".."} // Adjust as needed
 
-	outputFile, err := os.Create("codebase_map.jsonl")
+	outputFile, err := os.Create("ast-rag/codebase_map.jsonl")
 	if err != nil {
 		fmt.Printf("Error creating output file: %v\n", err)
 		os.Exit(1)
 	}
 	defer outputFile.Close()
+
+	// fix for escaping characters
+	encoder.SetEscapeHTML(false)
 
 	encoder := json.NewEncoder(outputFile)
 
